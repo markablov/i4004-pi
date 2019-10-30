@@ -247,6 +247,61 @@ div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor_next_word:
   ISZ rr5, div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor_next_word
   BBL 0
 
+// divide N-word by 1-word
+// REGISTER MODIFIED:
+//   rr6/rr7 - dividend digit RAM address
+//   rr2 - divisor
+// INPUT:
+//   dividend - bank #7, register #F, main characters [0..4], LSW at #0 character
+//   divisor - bank #7, register #F, main characters [5..9]
+// OUTPUT:
+//   quotient - rr8/rr9
+//   reminder - bank #7, register #F, main characters [0..4]
+// NOTES:
+//   quotient is always 1 or 2 digits, so we know that if dividend is 3-word number, then MSW < divisor
+div_buf_by_numerator_one_word_divisor:
+  // load divisor
+  FIM r3, 0xF5
+  SRC r3
+  RDM
+  XCH rr2
+  // calculate MSW for quotient
+  LDM 2
+  XCH rr7
+  SRC r3
+  RDM
+  XCH rr0
+  LDM 0
+  WRM
+  LDM 1
+  XCH rr7
+  SRC r3
+  RDM
+  XCH rr1
+  LDM 0
+  WRM
+  // call div8bitBy4bit(dividend[2], dividend[1], divisor)
+  JMS div8bitBy4bit
+  // rr0 - quotient, rr1 - reminder
+  LD rr0
+  XCH rr9
+  // calculate LSW for quotient
+  LD rr1
+  XCH rr0
+  LDM 0
+  XCH rr7
+  SRC r3
+  RDM
+  XCH rr1
+  // call div8bitBy4bit(reminder, dividend[0], divisor)
+  JMS div8bitBy4bit
+  // rr0 - quotient, rr1 - reminder
+  LD rr0
+  XCH rr8
+  LD rr1
+  WRM
+  BBL 0
+
 div_buf_by_numerator_normalize_get_shift_value:
   BBL 0
 
