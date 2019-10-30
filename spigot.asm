@@ -350,7 +350,23 @@ shift_left_bit:
   XCH rr3
   BBL 0
 
+// shift right 4bit number
+// INPUT:
+//   rr7 - shift value
+//   rr4 - value
+// OUTPUT:
+//   rr4 - shifter value
 shift_right:
+  LD rr7
+  CMA
+  IAC
+  XCH rr5
+  LD rr4
+shift_right_bit:
+  CLC
+  RAR
+  ISZ rr5, shift_right_bit
+  XCH rr4
   BBL 0
 
 // shift left multiword number
