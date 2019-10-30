@@ -331,7 +331,23 @@ div_buf_by_numerator_normalize_get_shift_value:
 div_buf_by_numerator_normalize_get_shift_value_return:
   BBL 0
 
+// shift left 4bit number
+// INPUT:
+//   rr6 - shift value
+//   rr3 - value
+// OUTPUT:
+//   rr3 - shifter value
 shift_left:
+  LD rr6
+  CMA
+  IAC
+  XCH rr5
+  LD rr3
+shift_left_bit:
+  CLC
+  RAL
+  ISZ rr5, shift_left_bit
+  XCH rr3
   BBL 0
 
 shift_right:
