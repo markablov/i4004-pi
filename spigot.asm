@@ -227,7 +227,24 @@ div_buf_by_numerator_number_len_check_prev_word:
   INC rr2
   BBL 0
 
+// check if dividend bigger or equal than divisor
+// OUTPUT:
+//   CARRY is set if dividend is bigger or equal than divisor
 div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor:
+  FIM r0, 0xF0
+  FIM r1, 0xF5
+  LDM 0xB
+  XCH rr5
+  STC
+div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor_next_word:
+  SRC r0
+  RDM
+  SRC r1
+  CMC
+  SBM
+  INC rr1
+  INC rr3
+  ISZ rr5, div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor_next_word
   BBL 0
 
 div_buf_by_numerator_normalize_get_shift_value:
