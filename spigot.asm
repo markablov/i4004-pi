@@ -205,7 +205,26 @@ div8bitBy4bit_return:
   CLC
   BBL 0
 
+// get word count for number (detected by 0 at most significant word)
+// INPUT:
+//   rr1 - index for last character in memory allocated for number + 1
+//   rr2 - max possible length of number + 1
+// OUTPUT:
+//   rr2 - word count
 div_buf_by_numerator_number_len:
+  LDM 0xF
+  XCH rr0
+div_buf_by_numerator_number_len_check_prev_word:
+  LD rr1
+  DAC
+  XCH rr1
+  LD rr2
+  DAC
+  XCH rr2
+  SRC r0
+  RDM
+  JCN z, div_buf_by_numerator_number_len_check_prev_word
+  INC rr2
   BBL 0
 
 div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor:
