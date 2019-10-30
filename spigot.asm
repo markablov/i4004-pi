@@ -331,7 +331,54 @@ div_buf_by_numerator_normalize_get_shift_value:
 div_buf_by_numerator_normalize_get_shift_value_return:
   BBL 0
 
+shift_left:
+  BBL 0
+
+shift_right:
+  BBL 0
+
+// shift left multiword number
+// INPUT:
+//   rr6 - shift value
+//   rr7 - (4 - shift value)
+//   rr1 - (character index in memory for MSW shifting number) + 1
+//   rr2 - number of words
 div_buf_by_numerator_shift_number_left:
+  LDM 0xF
+  XCH rr0
+  LD rr2
+  CMA
+  XCH rr2
+div_buf_by_numerator_shift_number_left_shift_digit:
+  // shift right next digit, some bits would be transferred to current difit
+  LD rr1
+  DAC
+  XCH rr1
+  SRC r0
+  RDM
+  XCH rr4
+  JMS shift_right
+  // shift left current digit
+  INC rr1
+  SRC r0
+  RDM
+  XCH rr3
+  JMS shift_left
+  LD rr3
+  CLC
+  ADD rr4
+  WRM
+  LD rr1
+  DAC
+  XCH rr1
+  ISZ rr2, div_buf_by_numerator_shift_number_left_shift_digit
+  // shift left LSW
+  SRC r0
+  RDM
+  XCH rr3
+  JMS shift_left
+  LD rr3
+  WRM
   BBL 0
 
 div_buf_by_numerator_get_quotient_digit:
