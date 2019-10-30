@@ -302,7 +302,33 @@ div_buf_by_numerator_one_word_divisor:
   WRM
   BBL 0
 
+// determine on how many bits we need to shift divisor left to set MSB to 1
+// OUTPUT:
+//   shift value - rr6
 div_buf_by_numerator_normalize_get_shift_value:
+  LDM 0x0
+  XCH rr6
+  // read MSW for divisor
+  FIM r0, 0xF4
+  LD rr11
+  ADD rr1
+  XCH rr1
+  SRC r0
+  RDM
+  XCH rr5
+  LDM 0x8
+  SUB rr5
+  JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
+  INC rr6
+  LDM 0x4
+  SUB rr5
+  JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
+  INC rr6
+  LDM 0x2
+  SUB rr5
+  JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
+  INC rr6
+div_buf_by_numerator_normalize_get_shift_value_return:
   BBL 0
 
 div_buf_by_numerator_shift_number_left:
