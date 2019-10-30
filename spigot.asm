@@ -205,7 +205,125 @@ div8bitBy4bit_return:
   CLC
   BBL 0
 
+div_buf_by_numerator_number_len:
+  BBL 0
+
+div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor:
+  BBL 0
+
+div_buf_by_numerator_normalize_get_shift_value:
+  BBL 0
+
+div_buf_by_numerator_shift_number_left:
+  BBL 0
+
+div_buf_by_numerator_get_quotient_digit:
+  BBL 0
+
+div_buf_by_numerator_shift_number_right:
+  BBL 0
+
+// divide N-word number from buffer by M-word number
+// INPUT:
+//   dividend - bank #7, register #F, main characters [0..4], LSW at #0 character
+//   divisor - bank #7, register #F, main characters [5..9]
+// OUTPUT:
+//   quotient - rr8/rr9
+//   reminder - bank #7, register #F, main characters [0..4]
+// REGISTER UNMODIFIED:
+//   rr12/rr13/rr14/rr15
+// REGISTER MODIFIED:
+//   rr10 - number of words for dividend
+//   rr11 - number of words for divisor
 div_buf_by_numerator:
+  // get word count for dividend
+  LDM 0x5
+  XCH rr1
+  LDM 0x6
+  XCH rr2
+  JMS div_buf_by_numerator_number_len
+  LD rr2
+  XCH rr10
+  // get word count for divisor
+  LDM 0xA
+  XCH rr1
+  LDM 0x6
+  XCH rr2
+  JMS div_buf_by_numerator_number_len
+  LD rr2
+  XCH rr11
+  // check if dividend >= divisor, otherwise return quotient = 0
+  JMS div_buf_by_numerator_is_dividend_bigger_or_equal_than_divisor
+  JCN c, div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor
+  FIM r4, 0x00
+  BBL 0
+div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor:
+  // check if we have 4bit divisor, in that case we use faster and simpler calculations
+  LDM 1
+  SUB rr11
+  JCN c, div_buf_by_numerator_one_word_divisor
+  // shift divisor and dividend to X bits to make sure that MSB for divisor is set
+  // in that case we can estimate quotient digit with high probability to match real digit
+  JMS div_buf_by_numerator_normalize_get_shift_value
+  FIM 0xF9
+  LD rr6
+  WRM
+  JCN z, div_buf_by_numerator_normalize_finish
+  LDM 4
+  SUB rr6
+  CLC
+  XCH rr7
+  LD rr10
+  XCH rr2
+  LDM 0
+  ADD rr2
+  XCH rr1
+  JMS div_buf_by_numerator_shift_number_left
+  LD rr11
+  XCH rr2
+  LDM 5
+  ADD rr2
+  XCH rr1
+  JMS div_buf_by_numerator_shift_number_left
+div_buf_by_numerator_normalize_finish:
+  LDM 2
+  XCH rr0
+  LD rr10
+  IAC
+  SUB rr11
+  SUB rr0
+  JCN nc, div_buf_by_numerator_get_lsw_for_quotient
+  // 2nd digit for quotient, if necessary
+  LDM 1
+  XCH rr7
+  JMS div_buf_by_numerator_get_quotient_digit
+  LD rr6
+  XCH rr9
+div_buf_by_numerator_get_lsw_for_quotient:
+  // 1st digit for quotient
+  LDM 0
+  XCH rr7
+  JMS div_buf_by_numerator_get_quotient_digit
+  LD rr6
+  XCH rr8
+  // denormalization
+  FIM 0xF9
+  RDM
+  XCH rr6
+  LDM 4
+  SUB rr6
+  CLC
+  XCH rr7
+  LDM 0x0
+  XCH rr1
+  LD rr11
+  XCH rr2
+  JMS div_buf_by_numerator_shift_number_right
+  LDM 0x5
+  XCH rr1
+  LD rr11
+  XCH rr2
+  JMS div_buf_by_numerator_shift_number_right
   BBL 0
 
 get_denominator_by_numerator:
