@@ -170,8 +170,39 @@ work_is_done:
   // halt
   JUN work_is_done
 
-
+// divide 8bit number by 4bit number
+// INPUT:
+//   rr0 - high word of dividend, rr1 - low word of dividend, rr2 - divisor
+// OUTPUT:
+//   rr0 - quotient, rr1 - reminder, CARRY flag would be set in case of overflow (quotient > 15)
+// REGISTERS MODIFIED:
+//   rr3 - temporal quotient
+//   rr6 - zero
 div8bitBy4bit:
+  CLB
+  XCH rr3
+  CLB
+  XCH rr6
+div8bitBy4bit_subtract:
+  CLC
+  LD rr1
+  SUB rr2
+  XCH rr1
+  CMC
+  LD rr0
+  SUB rr6
+  XCH rr0
+  JCN nc, div8bitBy4bit_return
+  ISZ rr3, div8bitBy4bit_subtract
+  // overflow occurs
+  BBL 0
+div8bitBy4bit_return:
+  LD rr1
+  ADD rr2
+  XCH rr1
+  LD rr3
+  XCH rr0
+  CLC
   BBL 0
 
 div_buf_by_numerator:
