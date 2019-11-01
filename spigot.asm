@@ -716,7 +716,8 @@ div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor:
   // shift divisor and dividend to X bits to make sure that MSB for divisor is set
   // in that case we can estimate quotient digit with high probability to match real digit
   JMS div_buf_by_numerator_normalize_get_shift_value
-  FIM 0xF9
+  FIM r0, 0xF9
+  SRC r0
   LD rr6
   WRM
   JCN z, div_buf_by_numerator_normalize_finish
@@ -758,7 +759,8 @@ div_buf_by_numerator_get_lsw_for_quotient:
   LD rr6
   XCH rr8
   // denormalization
-  FIM 0xF9
+  FIM r0, 0xF9
+  SRC r0
   RDM
   XCH rr7
   LDM 4
@@ -775,6 +777,10 @@ div_buf_by_numerator_get_lsw_for_quotient:
   LD rr11
   XCH rr2
   JMS div_buf_by_numerator_shift_number_right
+  FIM r0, 0xF9
+  SRC r0
+  LDM 0x0
+  WRM
   BBL 0
 
 get_denominator_by_numerator:
