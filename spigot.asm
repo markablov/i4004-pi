@@ -714,7 +714,7 @@ div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor:
   CLC
   LDM 1
   SUB rr11
-  JCN c, div_buf_by_numerator_one_word_divisor
+  JCN z, div_buf_by_numerator_one_word_divisor
   // shift divisor and dividend to X bits to make sure that MSB for divisor is set
   // in that case we can estimate quotient digit with high probability to match real digit
   JMS div_buf_by_numerator_normalize_get_shift_value
