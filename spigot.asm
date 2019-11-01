@@ -344,8 +344,8 @@ shift_left:
   XCH rr5
   LD rr3
 shift_left_bit:
-  CLC
   RAL
+  CLC
   ISZ rr5, shift_left_bit
   XCH rr3
   BBL 0
@@ -363,8 +363,8 @@ shift_right:
   XCH rr5
   LD rr4
 shift_right_bit:
-  CLC
   RAR
+  CLC
   ISZ rr5, shift_right_bit
   XCH rr4
   BBL 0
@@ -397,7 +397,6 @@ div_buf_by_numerator_shift_number_left_shift_digit:
   XCH rr3
   JMS shift_left
   LD rr3
-  CLC
   ADD rr4
   WRM
   LD rr1
