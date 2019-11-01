@@ -504,11 +504,11 @@ div_buf_by_numerator_get_lsw_for_quotient:
   // denormalization
   FIM 0xF9
   RDM
-  XCH rr6
-  LDM 4
-  SUB rr6
-  CLC
   XCH rr7
+  LDM 4
+  SUB rr7
+  CLC
+  XCH rr6
   LDM 0x0
   XCH rr1
   LD rr11
