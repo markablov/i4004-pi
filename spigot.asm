@@ -224,6 +224,7 @@ div_buf_by_numerator_number_len_check_prev_word:
   SRC r0
   RDM
   JCN z, div_buf_by_numerator_number_len_check_prev_word
+  CLC
   BBL 0
 
 // check if dividend bigger or equal than divisor
@@ -711,6 +712,7 @@ div_buf_by_numerator:
   BBL 0
 div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor:
   // check if we have 4bit divisor, in that case we use faster and simpler calculations
+  CLC
   LDM 1
   SUB rr11
   JCN c, div_buf_by_numerator_one_word_divisor
