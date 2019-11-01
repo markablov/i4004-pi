@@ -764,6 +764,7 @@ div_buf_by_numerator_get_lsw_for_quotient:
   FIM r0, 0xF9
   SRC r0
   RDM
+  JCN z, div_buf_by_numerator_return
   XCH rr7
   LDM 4
   SUB rr7
@@ -783,6 +784,7 @@ div_buf_by_numerator_get_lsw_for_quotient:
   SRC r0
   LDM 0x0
   WRM
+div_buf_by_numerator_return:
   BBL 0
 
 get_denominator_by_numerator:
