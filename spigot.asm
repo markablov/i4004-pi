@@ -328,6 +328,7 @@ div_buf_by_numerator_normalize_get_shift_value:
   JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
   INC rr6
 div_buf_by_numerator_normalize_get_shift_value_return:
+  CLC
   BBL 0
 
 // shift left 4bit number
