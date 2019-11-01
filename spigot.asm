@@ -502,6 +502,7 @@ div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown:
   SRC r2
   // dividend[divisorDigits + quotentDigitIdx - 2]
   RDM
+  CLC
   SUB rr3
   JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
   JCN nz, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
