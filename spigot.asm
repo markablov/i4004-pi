@@ -288,8 +288,7 @@ div_buf_by_numerator_one_word_divisor:
   // calculate LSW for quotient
   LD rr1
   XCH rr0
-  LDM 0
-  XCH rr7
+  FIM r3, 0xF0
   SRC r3
   RDM
   XCH rr1
