@@ -412,7 +412,231 @@ div_buf_by_numerator_shift_number_left_shift_digit:
   WRM
   BBL 0
 
+// multiply 1-word number by 1-word number, output is 2-word
+// INPUT:
+//   rr0 - multiplier
+//   rr1 - multiplicand
+// OUTPUT:
+//   rr2 - low word
+//   rr3 - high word
+mul4bitBy4bit:
+  FIM r1, 0x00
+  LD rr1
+  JCN z, mul4bitBy4bit_return
+  CMA
+  IAC
+  XCH rr1
+mul4bitBy4bit_add:
+  LD rr2
+  ADD rr0
+  XCH rr2
+  LDM 0
+  ADD rr3
+  XCH rr3
+  ISZ rr1, mul4bitBy4bit_add
+mul4bitBy4bit_return:
+  BBL 0
+
+// get single quotient digit at specified position
+// INPUT:
+//   rr7 - quotient digit idx
+//   rr10 - number of words for dividend
+//   rr11 - number of words for divisor
+//   dividend - bank #7, register #F, main characters [0..4], LSW at #0 character
+//   divisor - bank #7, register #F, main characters [5..9]
+// OUTPUT:
+//   rr6 - quotient digit
+// REGISTER MODIFIED:
+//   rr0/rr1/rr2/rr3/rr4/rr5
+//   rr9 - temporal variable, we can use it because it would be overwritten by high quotient digit after call
 div_buf_by_numerator_get_quotient_digit:
+  FIM r2, 0xF4
+  LD rr11
+  ADD rr5
+  XCH rr5
+  SRC r2
+  RDM
+  // divisor[divisorDigits - 1]
+  XCH rr2
+  LD rr11
+  DAC
+  CLC
+  ADD rr7
+  XCH rr5
+  SRC r2
+  RDM
+  // dividend[divisorDigits + quotentDigitIdx - 1]
+  XCH rr1
+  INC rr5
+  SRC r2
+  RDM
+  // dividend[divisorDigits + quotentDigitIdx]
+  XCH rr0
+  JMS div8bitBy4bit
+  LD rr1
+  XCH rr9
+  LD rr0
+  XCH rr6
+  // quotient digit should be in range [0..F]
+  JCN nc, div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown
+  LDM 0xF
+  XCH rr6
+  JUN div_buf_by_numerator_get_quotient_digit_mulsub
+div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown:
+  LDM 3
+  ADD rr11
+  XCH rr5
+  SRC r2
+  // divisor[divisorDigits - 2]
+  RDM
+  XCH rr1
+  LD rr6
+  XCH rr0
+  JMS mul4bitBy4bit
+  LDM 2
+  XCH rr0
+  LD rr11
+  ADD rr7
+  SUB rr0
+  XCH rr5
+  SRC r2
+  // dividend[divisorDigits + quotentDigitIdx - 2]
+  RDM
+  SUB rr3
+  JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
+  JCN nz, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
+  LD rr9
+  SUB rr2
+  JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
+div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient:
+  LD rr6
+  DAC
+  CLC
+  XCH rr6
+  LDM 4
+  ADD rr11
+  XCH rr5
+  SRC r2
+  // divisor[divisorDigits - 1]
+  RDM
+  ADD rr9
+  XCH rr9
+  JCN nc, div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown
+div_buf_by_numerator_get_quotient_digit_mulsub:
+  // rr4 - carry
+  // rr5 - digit idx
+  // rr9 - loop iterator
+  LDM 0
+  XCH rr4
+  LDM 0
+  XCH rr5
+  LD rr11
+  CMA
+  IAC
+  XCH rr9
+div_buf_by_numerator_get_quotient_digit_mulsub_digit:
+  FIM r0, 0xF5
+  LDM 0x5
+  ADD rr5
+  XCH rr1
+  SRC r0
+  // divisor[divisorDigitIdx]
+  RDM
+  XCH rr1
+  LD rr6
+  XCH rr0
+  JMS mul4bitBy4bit
+  // rr2 = product[0], rr3 = product[1]
+  FIM r0, 0xF0
+  LD rr5
+  ADD rr7
+  XCH rr1
+  SRC r0
+  // dividend[divisorDigitIdx + quotentDigitIdx]
+  RDM
+  SUB rr4
+  XCH rr0
+  CMC
+  TCC
+  XCH rr4
+  LD rr0
+  SUB rr2
+  CMC
+  JCN nc, div_buf_by_numerator_get_quotient_digit_mulsub_digit_no_more_carry
+  INC rr4
+  CLC
+div_buf_by_numerator_get_quotient_digit_mulsub_digit_no_more_carry:
+  WRM
+  LD rr4
+  ADD rr3
+  XCH rr4
+  INC rr5
+  ISZ rr9, div_buf_by_numerator_get_quotient_digit_mulsub_digit
+div_buf_by_numerator_get_quotient_digit_mulsub_last_digit:
+  FIM r0, 0xF0
+  LD rr11
+  ADD rr7
+  XCH rr1
+  SRC r0
+  // dividend[dividendDigitIdx]
+  RDM
+  SUB rr4
+  CMC
+  WRM
+  JCN nc, div_buf_by_numerator_get_quotient_digit_return
+  // compensate if current reminder is negative now
+  LD rr6
+  DAC
+  XCH rr6
+  // rr4 - carry
+  // rr5 - digit idx
+  // rr9 - loop iterator
+  LDM 0
+  XCH rr4
+  LDM 0
+  XCH rr5
+  LD rr11
+  CMA
+  IAC
+  XCH rr9
+div_buf_by_numerator_get_quotient_digit_add_digit:
+  FIM r0, 0xF0
+  LDM 0x5
+  ADD rr5
+  XCH rr1
+  SRC r0
+  // divisor[divisorDigitIdx]
+  RDM
+  XCH rr2
+  LD rr5
+  ADD rr7
+  XCH rr1
+  SRC r0
+  // dividend[divisorDigitIdx + quotentDigitIdx]
+  RDM
+  ADD rr2
+  XCH rr3
+  TCC
+  XCH rr0
+  LD rr3
+  ADD rr4
+  WRM
+  TCC
+  ADD rr0
+  XCH rr4
+  INC rr5
+  ISZ rr9, div_buf_by_numerator_get_quotient_digit_add_digit
+div_buf_by_numerator_get_quotient_digit_add_digit_last_digit:
+  FIM r0, 0xF0
+  LD rr11
+  ADD rr6
+  XCH rr1
+  SRC r0
+  // dividend[dividendDigitIdx]
+  RDM
+  ADD rr4
+  WRM
+div_buf_by_numerator_get_quotient_digit_return:
   BBL 0
 
 // shift right multiword number
