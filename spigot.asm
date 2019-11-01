@@ -415,7 +415,39 @@ div_buf_by_numerator_shift_number_left_shift_digit:
 div_buf_by_numerator_get_quotient_digit:
   BBL 0
 
+// shift right multiword number
+// INPUT:
+//   rr7 - shift value
+//   rr6 - (4 - shift value)
+//   rr1 - character index in memory for LSW
+//   rr2 - number of words
 div_buf_by_numerator_shift_number_right:
+  LDM 0xF
+  XCH rr0
+  LD rr2
+  CMA
+  IAC
+  XCH rr2
+div_buf_by_numerator_shift_number_right_digit:
+  SRC r0
+  RDM
+  XCH rr4
+  JMS shift_right
+  INC rr1
+  SRC r0
+  RDM
+  XCH rr3
+  JMS shift_left
+  LD rr1
+  DAC
+  XCH rr1
+  SRC r0
+  CLC
+  LD rr3
+  ADD rr4
+  WRM
+  INC rr1
+  ISZ rr2, div_buf_by_numerator_shift_number_right_digit
   BBL 0
 
 // divide N-word number from buffer by M-word number
