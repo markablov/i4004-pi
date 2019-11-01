@@ -315,15 +315,15 @@ div_buf_by_numerator_normalize_get_shift_value:
   SRC r0
   RDM
   XCH rr5
-  LDM 0x8
+  LDM 0x7
   SUB rr5
   JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
   INC rr6
-  LDM 0x4
+  LDM 0x3
   SUB rr5
   JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
   INC rr6
-  LDM 0x2
+  LDM 0x1
   SUB rr5
   JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
   INC rr6
