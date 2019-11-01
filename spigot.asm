@@ -224,7 +224,6 @@ div_buf_by_numerator_number_len_check_prev_word:
   SRC r0
   RDM
   JCN z, div_buf_by_numerator_number_len_check_prev_word
-  INC rr2
   BBL 0
 
 // check if dividend bigger or equal than divisor
