@@ -447,7 +447,7 @@ mul4bitBy4bit_return:
 //   rr6 - quotient digit
 // REGISTER MODIFIED:
 //   rr0/rr1/rr2/rr3/rr4/rr5
-//   rr9 - temporal variable, we can use it because it would be overwritten by high quotient digit after call
+//   rr8 - temporal variable, we can use it because it would be overwritten by low quotient digit after call
 div_buf_by_numerator_get_quotient_digit:
   FIM r2, 0xF4
   LD rr11
@@ -473,7 +473,7 @@ div_buf_by_numerator_get_quotient_digit:
   XCH rr0
   JMS div8bitBy4bit
   LD rr1
-  XCH rr9
+  XCH rr8
   LD rr0
   XCH rr6
   // quotient digit should be in range [0..F]
@@ -504,7 +504,7 @@ div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown:
   SUB rr3
   JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
   JCN nz, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
-  LD rr9
+  LD rr8
   SUB rr2
   JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
 div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient:
@@ -518,13 +518,13 @@ div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient:
   SRC r2
   // divisor[divisorDigits - 1]
   RDM
-  ADD rr9
-  XCH rr9
+  ADD rr8
+  XCH rr8
   JCN nc, div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown
 div_buf_by_numerator_get_quotient_digit_mulsub:
   // rr4 - carry
   // rr5 - digit idx
-  // rr9 - loop iterator
+  // rr8 - loop iterator
   LDM 0
   XCH rr4
   LDM 0
@@ -532,7 +532,7 @@ div_buf_by_numerator_get_quotient_digit_mulsub:
   LD rr11
   CMA
   IAC
-  XCH rr9
+  XCH rr8
 div_buf_by_numerator_get_quotient_digit_mulsub_digit:
   FIM r0, 0xF5
   LDM 0x5
@@ -570,7 +570,7 @@ div_buf_by_numerator_get_quotient_digit_mulsub_digit_no_more_carry:
   ADD rr3
   XCH rr4
   INC rr5
-  ISZ rr9, div_buf_by_numerator_get_quotient_digit_mulsub_digit
+  ISZ rr8, div_buf_by_numerator_get_quotient_digit_mulsub_digit
 div_buf_by_numerator_get_quotient_digit_mulsub_last_digit:
   FIM r0, 0xF0
   LD rr11
@@ -589,7 +589,7 @@ div_buf_by_numerator_get_quotient_digit_mulsub_last_digit:
   XCH rr6
   // rr4 - carry
   // rr5 - digit idx
-  // rr9 - loop iterator
+  // rr8 - loop iterator
   LDM 0
   XCH rr4
   LDM 0
@@ -597,7 +597,7 @@ div_buf_by_numerator_get_quotient_digit_mulsub_last_digit:
   LD rr11
   CMA
   IAC
-  XCH rr9
+  XCH rr8
 div_buf_by_numerator_get_quotient_digit_add_digit:
   FIM r0, 0xF0
   LDM 0x5
@@ -624,7 +624,7 @@ div_buf_by_numerator_get_quotient_digit_add_digit:
   ADD rr0
   XCH rr4
   INC rr5
-  ISZ rr9, div_buf_by_numerator_get_quotient_digit_add_digit
+  ISZ rr8, div_buf_by_numerator_get_quotient_digit_add_digit
 div_buf_by_numerator_get_quotient_digit_add_digit_last_digit:
   FIM r0, 0xF0
   LD rr11
