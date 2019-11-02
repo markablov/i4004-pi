@@ -630,7 +630,7 @@ div_buf_by_numerator_get_quotient_digit_add_digit:
 div_buf_by_numerator_get_quotient_digit_add_digit_last_digit:
   FIM r0, 0xF0
   LD rr11
-  ADD rr6
+  ADD rr7
   XCH rr1
   SRC r0
   // dividend[dividendDigitIdx]
