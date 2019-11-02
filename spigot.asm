@@ -741,13 +741,9 @@ div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor:
   XCH rr1
   JMS div_buf_by_numerator_shift_number_left
 div_buf_by_numerator_normalize_finish:
-  LDM 1
-  XCH rr0
   LD rr10
-  IAC
   SUB rr11
-  SUB rr0
-  JCN nc, div_buf_by_numerator_get_lsw_for_quotient
+  JCN z, div_buf_by_numerator_get_lsw_for_quotient
   // 2nd digit for quotient, if necessary
   CLC
   LDM 1
