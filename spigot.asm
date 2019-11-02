@@ -749,6 +749,7 @@ div_buf_by_numerator_normalize_finish:
   SUB rr0
   JCN nc, div_buf_by_numerator_get_lsw_for_quotient
   // 2nd digit for quotient, if necessary
+  CLC
   LDM 1
   XCH rr7
   JMS div_buf_by_numerator_get_quotient_digit
