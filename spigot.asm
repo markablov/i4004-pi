@@ -741,7 +741,7 @@ div_buf_by_numerator_dividend_is_bigger_or_equal_than_divisor:
   XCH rr1
   JMS div_buf_by_numerator_shift_number_left
 div_buf_by_numerator_normalize_finish:
-  LDM 2
+  LDM 1
   XCH rr0
   LD rr10
   IAC
