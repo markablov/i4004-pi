@@ -493,20 +493,20 @@ div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown:
   LD rr6
   XCH rr0
   JMS mul4bitBy4bit
+  LD rr8
+  SUB rr3
+  JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
+  JCN nz, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
   LDM 2
   XCH rr0
   LD rr11
   ADD rr7
   SUB rr0
+  CLC
   XCH rr5
   SRC r2
   // dividend[divisorDigits + quotentDigitIdx - 2]
   RDM
-  CLC
-  SUB rr3
-  JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
-  JCN nz, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
-  LD rr8
   SUB rr2
   JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
 div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient:
