@@ -638,6 +638,7 @@ div_buf_by_numerator_get_quotient_digit_add_digit_last_digit:
   RDM
   ADD rr4
   WRM
+  CLC
 div_buf_by_numerator_get_quotient_digit_return:
   BBL 0
 
