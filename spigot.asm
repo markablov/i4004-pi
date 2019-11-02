@@ -495,9 +495,10 @@ div_buf_by_numerator_get_quotient_digit_quotient_is_not_overflown:
   JMS mul4bitBy4bit
   LD rr8
   SUB rr3
-  JCN c, div_buf_by_numerator_get_quotient_digit_mulsub
-  JCN nz, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
-  LDM 2
+  JCN nc, div_buf_by_numerator_get_quotient_digit_rough_tune_estimated_quotient
+  JCN nz, div_buf_by_numerator_get_quotient_digit_mulsub
+  // we have carry flag there, so it would be added to rr7, take it into account
+  LDM 3
   XCH rr0
   LD rr11
   ADD rr7
