@@ -374,6 +374,7 @@ div_buf_by_numerator_shift_number_left:
   XCH rr0
   LD rr2
   CMA
+  IAC
   XCH rr2
 div_buf_by_numerator_shift_number_left_shift_digit:
   // shift right next digit, some bits would be transferred to current difit
