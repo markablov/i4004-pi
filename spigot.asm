@@ -307,6 +307,8 @@ div_buf_by_numerator_one_word_divisor:
 div_buf_by_numerator_normalize_get_shift_value:
   LDM 0x0
   XCH rr6
+  LDM 0xC
+  XCH rr5
   // read MSW for divisor
   FIM r0, 0xF4
   LD rr11
@@ -314,19 +316,11 @@ div_buf_by_numerator_normalize_get_shift_value:
   XCH rr1
   SRC r0
   RDM
-  XCH rr5
-  LDM 0x7
-  SUB rr5
-  JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
+div_buf_by_numerator_normalize_get_shift_value_check_binary_digit:
+  RAL
+  JCN c, div_buf_by_numerator_normalize_get_shift_value_return
   INC rr6
-  LDM 0x3
-  SUB rr5
-  JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
-  INC rr6
-  LDM 0x1
-  SUB rr5
-  JCN nc, div_buf_by_numerator_normalize_get_shift_value_return
-  INC rr6
+  ISZ rr5, div_buf_by_numerator_normalize_get_shift_value_check_binary_digit
 div_buf_by_numerator_normalize_get_shift_value_return:
   CLC
   BBL 0
