@@ -781,7 +781,71 @@ div_buf_by_numerator_get_lsw_for_quotient:
 div_buf_by_numerator_return:
   BBL 0
 
+// return corresponding denominator for specified numerator
+// INPUT:
+//   numerator - bank #7, register #F, main characters [5..9]
+// OUTPUT:
+//   denominator - rr5/rr6/rr7
 get_denominator_by_numerator:
+  FIM r0, 0xF5
+  SRC r0
+  RDM
+  XCH rr5
+  INC rr1
+  SRC r0
+  RDM
+  XCH rr6
+  INC rr1
+  SRC r0
+  RDM
+  XCH rr7
+  // subtract 1
+  FIM r0, 0x10
+  LD rr5
+  SUB rr0
+  CMC
+  XCH rr5
+  LD rr6
+  SUB rr1
+  XCH rr6
+  CMC
+  LD rr7
+  SUB rr1
+  XCH rr7
+  CMC
+  // divide by 2 (shift rigt by 1)
+  // 1st digit
+  LD rr6
+  RAR
+  JCN nc, get_denominator_by_numerator_2nd_word_1st_bit_iz_zero
+  LDM 0x8
+  XCH rr1
+  CLC
+get_denominator_by_numerator_2nd_word_1st_bit_iz_zero:
+  LD rr5
+  RAR
+  CLC
+  ADD rr1
+  XCH rr5
+  // 2nd digit
+  LDM 0x00
+  XCH rr1
+  LD rr7
+  RAR
+  JCN nc, get_denominator_by_numerator_3rd_word_1st_bit_iz_zero
+  LDM 0x8
+  XCH rr1
+  CLC
+get_denominator_by_numerator_3rd_word_1st_bit_iz_zero:
+  LD rr6
+  RAR
+  CLC
+  ADD rr1
+  XCH rr6
+  // 3rd digit
+  LD rr7
+  RAR
+  XCH rr7
   BBL 0
 
 get_linear_address_by_index:
