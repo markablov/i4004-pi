@@ -74,7 +74,7 @@ main_loop:
 normalization_loop:
   JMS get_denominator_by_numerator
   // rr5/rr6/rr7 would contain denominator
-  JMS get_linear_address_by_index
+  JMS get_linear_address_by_denominator
   // rr0/rr1/rr2 would contain linear address
   JMS read_element_to_buffer
   JMS mul_buf_by_10
@@ -83,7 +83,7 @@ normalization_loop:
   // rr8/rr9 would contain quotient
   JMS get_denominator_by_numerator
   // rr5/rr6/rr7 would contain denominator
-  JMS get_linear_address_by_index
+  JMS get_linear_address_by_denominator
   // rr0/rr1/rr2 would contain linear address
   JMS write_buffer_to_element
   JMS mul_denominator_by_quotient
@@ -786,6 +786,8 @@ div_buf_by_numerator_return:
 //   numerator - bank #7, register #F, main characters [5..9]
 // OUTPUT:
 //   denominator - rr5/rr6/rr7
+// NOTES:
+//   denominator = (numerator - 1) / 2
 get_denominator_by_numerator:
   FIM r0, 0xF5
   SRC r0
@@ -848,7 +850,61 @@ get_denominator_by_numerator_3rd_word_1st_bit_iz_zero:
   XCH rr7
   BBL 0
 
-get_linear_address_by_index:
+// return linear address for digit in mixed-radix pi
+// INPUT:
+//   rr5/rr6/rr7 - denominator
+// OUTPUT:
+//   rr0/rr1/rr2 - linear address
+// NOTES:
+//   address = (denominator - 1) * 3
+get_linear_address_by_denominator:
+  // subtract 1
+  FIM r1, 0x10
+  LD rr5
+  SUB rr2
+  CMC
+  XCH rr0
+  LD rr6
+  SUB rr3
+  XCH rr1
+  CMC
+  LD rr7
+  SUB rr3
+  XCH rr2
+  CMC
+  // multiply by 3
+  // 1-st digit
+  LD rr0
+  ADD rr0
+  XCH rr3
+  TCC
+  XCH rr4
+  LD rr3
+  ADD rr0
+  XCH rr0
+  TCC
+  ADD rr4
+  // 2-nd digit
+  ADD rr1
+  XCH rr3
+  TCC
+  XCH rr4
+  LD rr3
+  ADD rr1
+  XCH rr3
+  TCC
+  ADD rr4
+  XCH rr4
+  LD rr3
+  ADD rr1
+  XCH rr1
+  TCC
+  ADD rr4
+  // 3-rd digit
+  ADD rr2
+  ADD rr2
+  ADD rr2
+  XCH rr2
   BBL 0
 
 read_element_to_buffer:
