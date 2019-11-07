@@ -73,21 +73,21 @@ main_loop:
   WRM
 normalization_loop:
   JMS get_denominator_by_numerator
-  // rr5/rr6/rr7 would contain denominator
+  // rr0/rr1/rr2 would contain denominator
   JMS get_linear_address_by_denominator
-  // rr0/rr1/rr2 would contain linear address
+  // rr5/rr6/rr7 would contain linear address
   JMS read_element_to_buffer
   JMS mul_buf_by_10
   JMS add_carry_to_buf
   JMS div_buf_by_numerator
   // rr8/rr9 would contain quotient
   JMS get_denominator_by_numerator
-  // rr5/rr6/rr7 would contain denominator
-  JMS get_linear_address_by_denominator
-  // rr0/rr1/rr2 would contain linear address
-  JMS write_buffer_to_element
+  // rr0/rr1/rr2 would contain denominator
   JMS mul_denominator_by_quotient
-  // rr8/rr9/rr10/rr11 would contain quotient
+  // rr8/rr9/rr10/rr11 would contain carry
+  JMS get_linear_address_by_denominator
+  // rr5/rr6/rr7 would contain linear address
+  JMS write_buffer_to_element
   // decrease numerator by 2, and check if loop is done
   LDM 2
   XCH rr2
@@ -785,126 +785,129 @@ div_buf_by_numerator_return:
 // INPUT:
 //   numerator - bank #7, register #F, main characters [5..9]
 // OUTPUT:
-//   denominator - rr5/rr6/rr7
+//   denominator - rr0/rr1/rr2
 // NOTES:
 //   denominator = (numerator - 1) / 2
 get_denominator_by_numerator:
-  FIM r0, 0xF5
-  SRC r0
+  FIM r2, 0xF5
+  SRC r2
   RDM
-  XCH rr5
-  INC rr1
-  SRC r0
+  XCH rr0
+  INC rr5
+  SRC r02
   RDM
-  XCH rr6
-  INC rr1
-  SRC r0
+  XCH rr1
+  INC rr5
+  SRC r2
   RDM
-  XCH rr7
+  XCH rr2
   // subtract 1
-  FIM r0, 0x10
-  LD rr5
-  SUB rr0
+  FIM r2, 0x10
+  LD rr0
+  SUB rr4
   CMC
-  XCH rr5
-  LD rr6
-  SUB rr1
-  XCH rr6
+  XCH rr0
+  LD rr1
+  SUB rr5
+  XCH rr1
   CMC
-  LD rr7
-  SUB rr1
-  XCH rr7
+  LD rr2
+  SUB rr5
+  XCH rr2
   CMC
-  // divide by 2 (shift rigt by 1)
+  // divide by 2 (shift right by 1)
   // 1st digit
-  LD rr6
+  LD rr1
   RAR
   JCN nc, get_denominator_by_numerator_2nd_word_1st_bit_iz_zero
   LDM 0x8
-  XCH rr1
+  XCH rr6
   CLC
 get_denominator_by_numerator_2nd_word_1st_bit_iz_zero:
-  LD rr5
+  LD rr0
   RAR
   CLC
-  ADD rr1
-  XCH rr5
+  ADD rr6
+  XCH rr0
   // 2nd digit
   LDM 0x00
-  XCH rr1
-  LD rr7
+  XCH rr6
+  LD rr2
   RAR
   JCN nc, get_denominator_by_numerator_3rd_word_1st_bit_iz_zero
   LDM 0x8
-  XCH rr1
+  XCH rr6
   CLC
 get_denominator_by_numerator_3rd_word_1st_bit_iz_zero:
-  LD rr6
+  LD rr1
   RAR
   CLC
-  ADD rr1
-  XCH rr6
+  ADD rr6
+  XCH rr1
   // 3rd digit
-  LD rr7
+  LD rr2
   RAR
-  XCH rr7
+  XCH rr2
   BBL 0
 
 // return linear address for digit in mixed-radix pi
 // INPUT:
-//   rr5/rr6/rr7 - denominator
+//   rr0/rr1/rr2 - denominator
 // OUTPUT:
-//   rr0/rr1/rr2 - linear address
+//   rr5/rr6/rr7 - linear address
 // NOTES:
 //   address = (denominator - 1) * 3
 get_linear_address_by_denominator:
   // subtract 1
-  FIM r1, 0x10
-  LD rr5
-  SUB rr2
-  CMC
-  XCH rr0
-  LD rr6
+  LDM 0x1
+  XCH rr3
+  LDM 0x0
+  XCH rr4
+  LD rr0
   SUB rr3
-  XCH rr1
   CMC
-  LD rr7
-  SUB rr3
-  XCH rr2
+  XCH rr5
+  LD rr1
+  SUB rr4
+  XCH rr6
+  CMC
+  LD rr2
+  SUB rr4
+  XCH rr7
   CMC
   // multiply by 3
   // 1-st digit
-  LD rr0
-  ADD rr0
+  LD rr5
+  ADD rr5
   XCH rr3
   TCC
   XCH rr4
   LD rr3
-  ADD rr0
-  XCH rr0
+  ADD rr5
+  XCH rr5
   TCC
   ADD rr4
   // 2-nd digit
-  ADD rr1
+  ADD rr6
   XCH rr3
   TCC
   XCH rr4
   LD rr3
-  ADD rr1
+  ADD rr6
   XCH rr3
   TCC
   ADD rr4
   XCH rr4
   LD rr3
-  ADD rr1
-  XCH rr1
+  ADD rr6
+  XCH rr6
   TCC
   ADD rr4
   // 3-rd digit
-  ADD rr2
-  ADD rr2
-  ADD rr2
-  XCH rr2
+  ADD rr7
+  ADD rr7
+  ADD rr7
+  XCH rr7
   BBL 0
 
 read_element_to_buffer:
