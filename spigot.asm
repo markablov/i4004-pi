@@ -910,7 +910,256 @@ get_linear_address_by_denominator:
   XCH rr7
   BBL 0
 
+// select bank/register by specified word address and calculate character index inside register
+// INPUT:
+//   rr5/rr6/rr7 - linear address of word
+// OUTPUT:
+//   CARRY - if set, status character should be used, and rr2 would contain status character index (in 0-3 range)
+// NOTES:
+//   bankIdx = address / 320
+//   regIdx = (address % 320) / 20
+//   charIdx = ((address % 320) % 20)
+select_word_at_memory:
+  // *** BANK SELECTION ***
+  // save rr6, because div8bitBy4bit() would change it
+  LD rr6
+  XCH rr4
+  // shift address right by 6 (to divide by 2**6 = 64)
+  LD rr6
+  RAR
+  CLC
+  RAR
+  CLC
+  XCH rr1
+  LD rr7
+  RAL
+  CLC
+  RAL
+  CLC
+  ADD rr1
+  XCH rr1
+  LD rr7
+  RAR
+  CLC
+  RAR
+  CLC
+  XCH rr0
+  // additionally divide by 5 to receive bank index = (address / 320)
+  LDM 0x5
+  XCH rr2
+  JMS div8bitBy4bit
+  // restore register
+  LD rr4
+  XCH rr6
+  // select bank
+  LD rr0
+  DCL
+  XCH rr4
+  // *** CALCULATE OFFSET FOR WORD AT SELECTED BANK ***
+  // bank offset = address - (bank index * 0x140)
+  // because first digit of divisor is 0x0, we can use first digit of dividend (rr5) as first digit of reminder
+  // second digit of divisor is 0x4
+  LD rr4
+  RAL
+  CLC
+  RAL
+  CLC
+  XCH rr3
+  LD rr6
+  SUB rr3
+  XCH rr1
+  CMC
+  TCC
+  XCH rr3
+  LD rr4
+  RAR
+  CLC
+  RAR
+  CLC
+  ADD rr3
+  XCH rr3
+  LD rr7
+  SUB rr3
+  CLC
+  XCH rr2
+  // third digit is 0x1
+  LD rr2
+  SUB rr4
+  CLC
+  XCH rr2
+  // *** CALCULATE REGISTER INDEX ***
+  // shift bank offset right by 2 (to divide by 2**2 = 4)
+  LD rr5
+  RAR
+  CLC
+  RAR
+  CLC
+  XCH rr3
+  LD rr1
+  RAL
+  CLC
+  RAL
+  CLC
+  ADD rr3
+  XCH rr3
+  LD rr1
+  RAR
+  CLC
+  RAR
+  CLC
+  XCH rr4
+  LD rr2
+  RAL
+  CLC
+  RAL
+  CLC
+  ADD rr4
+  XCH rr4
+  // additionally divide by 5 to receive register index = (bank offset / 20)
+  // we can't use div8bitBy4bit coz we have so little free registers
+  LDM 0x0
+  XCH rr0
+select_word_at_memory_calculate_reg_index_loop:
+  CLC
+  LDM 0x5
+  XCH rr3
+  SUB rr3
+  XCH rr3
+  CMC
+  LDM 0x0
+  XCH rr4
+  SUB rr4
+  XCH rr4
+  JCN nc, select_word_at_memory_calculate_reg_index_finish
+  ISZ rr0, select_word_at_memory_calculate_reg_index_loop
+select_word_at_memory_calculate_reg_index_finish:
+  // *** CALCULATE OFFSET FOR WORD AT SELECTED REGISTER ***
+  // register offset = bank offset - register index * 0x14
+  LD rr0
+  RAL
+  CLC
+  RAL
+  CLC
+  XCH rr3
+  LD rr5
+  SUB rr3
+  XCH rr3
+  CMC
+  TCC
+  XCH rr4
+  LD rr0
+  RAR
+  CLC
+  RAR
+  CLC
+  ADD rr4
+  XCH rr4
+  LD rr1
+  SUB rr4
+  CLC
+  XCH rr4
+  LD rr4
+  SUB rr0
+  CLC
+  XCH rr4
+  // *** SELECT REGISTER/CHARACTER ***
+  LD rr3
+  XCH rr2
+  LDM 0x4
+  XCH rr3
+  SUB rr3
+  XCH rr1
+  JCN c, select_word_at_memory_main_character
+  // if overflow happens it either regOffset < 4 or regOffset > 15
+  LD rr4
+  JCN nz, select_word_at_memory_main_character
+  // regOffset < 4, then set carry and return status character index
+  LDM 0x0
+  XCH rr1
+  SRC r0
+  STC
+  BBL 0
+select_word_at_memory_main_character:
+  CLC
+  SRC r0
+  BBL 0
+
+// transfer word from specified RAM location into reserved place
+// INPUT:
+//   CARRY - if set, status character should be used, and rr2 would contain status character index (in 0-3 range)
+//   rr1 - word number
+// OUTPUT:
+//   word - bank #7, register #F, main character X (specified by rr1)
+read_word_to_buffer:
+  RDM
+  JCN nc, read_word_to_buffer_read
+  LD rr2
+  JCN nz, read_word_to_buffer_status_character_more_than_0
+  RD0
+  JUN read_word_to_buffer_read
+read_word_to_buffer_status_character_more_than_0:
+  DAC
+  JCN nz, read_word_to_buffer_status_character_more_than_1
+  RD1
+  JUN read_word_to_buffer_read
+read_word_to_buffer_status_character_more_than_1:
+  DAC
+  JCN nz, read_word_to_buffer_status_character_more_than_2
+  RD2
+  JUN read_word_to_buffer_read
+read_word_to_buffer_status_character_more_than_2:
+  RD3
+read_word_to_buffer_read:
+  XCH rr4
+  LDM 0x7
+  DCL
+  LDM 0xF
+  XCH rr0
+  SRC r0
+  LD rr4
+  WRM
+  CLC
+  BBL 0
+
+// transfer multi-word number from specified RAM location into reserved place
+// INPUT:
+//   rr5/rr6/rr7 - linear address of first word of element
+// OUTPUT:
+//   element - bank #7, register #F, main characters [0..4]
 read_element_to_buffer:
+  // first digit
+  JMS select_word_at_memory
+  LDM 0x0
+  XCH rr1
+  JMS read_word_to_buffer
+  // second digit
+  LD rr5
+  IAC
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  TCC
+  ADD rr7
+  XCH rr7
+  JMS select_word_at_memory
+  LDM 0x1
+  XCH rr1
+  JMS read_word_to_buffer
+  // third digit
+  LD rr5
+  IAC
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  TCC
+  ADD rr7
+  XCH rr7
+  JMS select_word_at_memory
+  LDM 0x2
+  XCH rr1
+  JMS read_word_to_buffer
   BBL 0
 
 mul_buf_by_10:
