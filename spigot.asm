@@ -78,7 +78,7 @@ normalization_loop:
   // rr5/rr6/rr7 would contain linear address
   JMS read_element_to_buffer
   JMS mul_buf_by_10
-  JMS add_carry_to_buf
+  JMS sum_carry_with_buf
   JMS div_buf_by_numerator
   // rr8/rr9 would contain quotient
   JMS get_denominator_by_numerator
@@ -1216,7 +1216,33 @@ mul_buf_by_10_digit:
   WRM
   BBL 0
 
-add_carry_to_buf:
+// add multi-word number, stored at reigsters to multi-word number, stored at buffer
+// INPUT:
+//   buffer - bank #7, register #F, main characters [0..4]
+//   carry - rr8/rr9/rr10/rr11
+// OUTPUT:
+//   buffer - bank #7, register #F, main characters [0..4]
+sum_carry_with_buf:
+  FIM r0, 0xF0
+  SRC r0
+  RDM
+  ADD rr8
+  WRM
+  INC rr1
+  SRC r0
+  RDM
+  ADD rr9
+  WRM
+  INC rr1
+  SRC r0
+  RDM
+  ADD rr10
+  WRM
+  INC rr1
+  SRC r0
+  RDM
+  ADD rr11
+  WRM
   BBL 0
 
 write_buffer_to_element:
