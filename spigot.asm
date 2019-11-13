@@ -1162,7 +1162,58 @@ read_element_to_buffer:
   JMS read_word_to_buffer
   BBL 0
 
+// multiply multi-word number, stored at buffer by 0xA
+// INPUT/OUTPUT:
+//   buffer - bank #7, register #F, main characters [0..4]
 mul_buf_by_10:
+  LDM 0x7
+  DCL
+  // 3 digits
+  FIM r0, 0xF0
+  LDM 0xD
+  XCH rr7
+  LDM 0x0
+  XCH rr4
+mul_buf_by_10_digit:
+  LD rr4
+  XCH rr3
+  SRC r0
+  RDM
+  XCH rr2
+  // multiply by 8 (shift left by 3)
+  LD rr2
+  RAR
+  LDM 0x0
+  RAR
+  ADD rr3
+  XCH rr3
+  TCC
+  XCH rr4
+  LD rr2
+  RAR
+  CLC
+  ADD rr4
+  XCH rr4
+  // multiply by 10
+  LD rr3
+  ADD rr2
+  XCH rr3
+  TCC
+  ADD rr4
+  XCH rr4
+  LD rr3
+  ADD rr2
+  XCH rr3
+  TCC
+  ADD rr4
+  XCH rr4
+  LD rr3
+  WRM
+  INC rr1
+  ISZ rr7, mul_buf_by_10_digit
+  SRC r0
+  LD rr4
+  WRM
   BBL 0
 
 add_carry_to_buf:
