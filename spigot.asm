@@ -1248,7 +1248,87 @@ sum_carry_with_buf:
 write_buffer_to_element:
   BBL 0
 
+// multiply multi-word number by another multi-word number
+// INPUT:
+//   denominator - rr0/rr1/rr2
+//   quotient - rr8/rr9
+// OUTPUT:
+//   product - rr8/rr9/rr10/rr11
+// NOTES:
+//   quotient <= 0x13, so we actually need to multiply multi-word number by single-word number
 mul_denominator_by_quotient:
+  LD rr8
+  CMA
+  IAC
+  CLC
+  XCH rr3
+  LD rr9
+  FIM r4, 0x00
+  FIM r5, 0x00
+  JCN z, mul_denominator_by_quotient_mul_first_digit_quotient
+  LD rr0
+  XCH rr9
+  LD rr1
+  XCH rr10
+  LD rr2
+  XCH rr11
+mul_denominator_by_quotient_mul_first_digit_quotient:
+  LD rr3
+  JCN z, mul_denominator_by_quotient_return
+  XCH rr4
+  FIM r3, 0x00
+mul_denominator_by_quotient_mul_first_digit_quotient_first_digit_denominator:
+  LD rr5
+  ADD rr0
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  ISZ rr4, mul_denominator_by_quotient_mul_first_digit_quotient_first_digit_denominator
+  LD rr5
+  XCH rr8
+  LD rr6
+  XCH rr5
+  LD rr9
+  ADD rr5
+  XCH rr5
+  TCC
+  XCH rr6
+  LD rr3
+  XCH rr4
+mul_denominator_by_quotient_mul_first_digit_quotient_second_digit_denominator:
+  LD rr5
+  ADD rr1
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  ISZ rr4, mul_denominator_by_quotient_mul_first_digit_quotient_second_digit_denominator
+  LD rr5
+  XCH rr9
+  LD rr6
+  XCH rr5
+  LD rr10
+  ADD rr5
+  XCH rr5
+  TCC
+  XCH rr6
+  LD rr3
+  XCH rr4
+mul_denominator_by_quotient_mul_first_digit_quotient_third_digit_denominator:
+  LD rr5
+  ADD rr2
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  ISZ rr4, mul_denominator_by_quotient_mul_first_digit_quotient_third_digit_denominator
+  LD rr5
+  XCH rr10
+  LD rr6
+  ADD rr11
+  XCH rr11
+mul_denominator_by_quotient_return:
   BBL 0
 
 send_computed_digit:
