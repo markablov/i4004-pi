@@ -1162,6 +1162,104 @@ read_element_to_buffer:
   JMS read_word_to_buffer
   BBL 0
 
+// transfer word from reserved buffer into specified RAM location
+// INPUT:
+//   CARRY - if set, status character should be used, and rr2 would contain status character index (in 0-3 range)
+//   rr8 - word from buffer
+write_word_to_element:
+  JCN c, write_word_to_element_status_character
+  LD rr8
+  WRM
+  BBL 0
+write_word_to_element_status_character:
+  CLC
+  LD rr2
+  JCN nz, write_word_to_element_status_character_more_than_0
+  LD rr8
+  WR0
+  BBL 0
+write_word_to_element_status_character_more_than_0:
+  DAC
+  JCN nz, write_word_to_element_status_character_more_than_1
+  LD rr8
+  WR1
+  BBL 0
+write_word_to_element_status_character_more_than_1:
+  DAC
+  JCN nz, write_word_to_element_status_character_more_than_2
+  LD rr8
+  WR2
+  BBL 0
+write_word_to_element_status_character_more_than_2:
+  LD rr8
+  WR3
+  BBL 0
+
+// transfer multi-word number from reserved buffer into specified RAM location
+// INPUT:
+//   rr5/rr6/rr7 - linear address of first word of element
+// NOTES:
+//   because of lack of free registers, we have to use rr8, that is used in main loop
+//   but we would need it later, so store rr8 at RAM
+write_buffer_to_element:
+  LDM 0x7
+  DCL
+  FIM r0, 0xF9
+  SRC r0
+  LD rr8
+  WRM
+  // first digit
+  FIM r0, 0xF0
+  SRC r0
+  RDM
+  XCH rr8
+  JMS select_word_at_memory
+  JMS write_word_to_element
+  // second digit
+  LDM 0x7
+  DCL
+  FIM r0, 0xF1
+  SRC r0
+  RDM
+  XCH rr8
+  LD rr5
+  IAC
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  TCC
+  ADD rr7
+  XCH rr7
+  JMS select_word_at_memory
+  JMS write_word_to_element
+  // third digit
+  LDM 0x7
+  DCL
+  FIM r0, 0xF2
+  SRC r0
+  RDM
+  XCH rr8
+  LD rr5
+  IAC
+  XCH rr5
+  TCC
+  ADD rr6
+  XCH rr6
+  TCC
+  ADD rr7
+  XCH rr7
+  JMS select_word_at_memory
+  JMS write_word_to_element
+  // restore rr8
+  LDM 0x7
+  DCL
+  FIM r0, 0xF9
+  SRC r0
+  RDM
+  XCH rr8
+  BBL 0
+
 // multiply multi-word number, stored at buffer by 0xA
 // INPUT/OUTPUT:
 //   buffer - bank #7, register #F, main characters [0..4]
@@ -1243,9 +1341,6 @@ sum_carry_with_buf:
   RDM
   ADD rr11
   WRM
-  BBL 0
-
-write_buffer_to_element:
   BBL 0
 
 // multiply multi-word number by another multi-word number
