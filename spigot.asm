@@ -1427,4 +1427,8 @@ mul_denominator_by_quotient_return:
   BBL 0
 
 send_computed_digit:
+  FIM r1, 0xF0
+  SRC r1
+  LD rr0
+  WMP
   BBL 0
