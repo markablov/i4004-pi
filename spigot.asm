@@ -1429,6 +1429,9 @@ mul_denominator_by_quotient_return:
 send_computed_digit:
   FIM r1, 0xF0
   SRC r1
+  // trigger that new digit appears
+  LDM 0xF
+  WMP
   LD rr0
   WMP
   BBL 0
